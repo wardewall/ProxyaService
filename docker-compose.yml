@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: proxyservice-db
+    environment:
+      POSTGRES_DB: proxyabot
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    ports:
+      - "5432:5432" # expose locally; remove in prod
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: proxyservice-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Telegram
+      BOT_TOKEN: ${BOT_TOKEN}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      # Proxy
+      PROXY_HOST: ${PROXY_HOST}
+      PROXY_PORT: ${PROXY_PORT}
+      PROXY_USER: ${PROXY_USER:-}
+      PROXY_PASS: ${PROXY_PASS:-}
+      AUTH_TOKENS: ${AUTH_TOKENS:-}
+      ALLOWED_USER_IDS: ${ALLOWED_USER_IDS:-}
+      # Database DSN (uses internal Docker DNS name 'db')
+      PG_DSN: postgres://postgres:postgres@db:5432/proxyabot?sslmode=disable
+      # Limits
+      DEFAULT_ROLE: ${DEFAULT_ROLE:-free}
+      RATE_LIMIT_FREE_PER_MIN: ${RATE_LIMIT_FREE_PER_MIN:-10}
+      RATE_LIMIT_PREMIUM_PER_MIN: ${RATE_LIMIT_PREMIUM_PER_MIN:-60}
+      RATE_LIMIT_ADMIN_PER_MIN: ${RATE_LIMIT_ADMIN_PER_MIN:-500}
+      THROTTLE_SECONDS: ${THROTTLE_SECONDS:-2}
+
+volumes:
+  pgdata:

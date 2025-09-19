@@ -1,0 +1,16 @@
+# git
+.git
+.gitignore
+
+# editor
+.vscode
+.idea
+
+# local
+.env
+*.log
+
+# build
+bin/
+obj/
+node_modules/
