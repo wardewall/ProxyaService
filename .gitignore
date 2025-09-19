@@ -1,0 +1,27 @@
+# Binaries
+/app
+/build
+/bin/
+*.exe
+*.out
+*.test
+
+# Go
+*.log
+coverage*
+
+# Env
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.tar
