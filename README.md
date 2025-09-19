@@ -63,5 +63,40 @@ go build ./...
 - Не коммитьте `.env`. Для продакшна используйте секреты/Vault/CI‑vars.
 - Откройте порт PostgreSQL наружу только при необходимости.
 
-## Лицензия
-MIT
+
+## Docker Desktop на Windows (шаги)
+
+1) Установи Docker Desktop (WSL2 backend). Во время установки включи Windows Subsystem for Linux.
+
+2) Запусти Docker Desktop и дождись статуса Running.
+
+3) Проверь .env (локальный файл, не коммитится) — как минимум нужны `BOT_TOKEN`, `PROXY_HOST`, `PROXY_PORT`.
+
+4) Запуск:
+```bash
+docker compose up -d --build
+docker compose logs -f app
+```
+
+5) Проверка БД:
+```bash
+docker compose exec -T db psql -U postgres -d proxyabot -c '\dt'
+```
+
+6) Частые проблемы:
+- "open //./pipe/dockerDesktopLinuxEngine": Docker Desktop не запущен — запусти и повтори.
+- Порт 5432 занят: измени публикацию порта в `docker-compose.yml` (например, `5433:5432`) или останови локальный PostgreSQL.
+- Переменные пустые: добавь значения в `.env`, compose подхватит их автоматически.
+
+## Deep‑link примеры
+
+- Аутентификация по токену (deeplink в Telegram):
+  - `https://t.me/<BOT_USERNAME>?start=<TOKEN>`
+  - Клиент Telegram передаст `<TOKEN>` как payload в `/start`, бот попытается аутентифицировать и сохранить статус.
+
+- Кнопка подключения прокси (бот шлёт в сообщении):
+  - `tg://socks?server=<HOST>&port=<PORT>&user=<USER>&pass=<PASS>`
+  - Срабатывает только внутри приложений Telegram; включает прокси для Telegram, не для всей системы.
+
+- Отключение прокси в Telegram:
+  - Настройки → Данные и память → Прокси → Выключить. В боте есть команда `/disable`, которая открывает нужный раздел.
